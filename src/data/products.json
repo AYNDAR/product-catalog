@@ -1,0 +1,73 @@
+[
+  {
+    "id": 1,
+    "productNumber": "PRD-1001",
+    "name": "Wireless Headphones",
+    "price": 120,
+    "category": "Electronics",
+    "rating": 4.5,
+    "image": "https://via.placeholder.com/300",
+    "description": "High quality wireless headphones"
+  },
+  {
+    "id": 2,
+    "productNumber": "PRD-1002",
+    "name": "Smart Watch",
+    "price": 180,
+    "category": "Electronics",
+    "rating": 4.2,
+    "image": "https://via.placeholder.com/300",
+    "description": "Advanced smartwatch with health tracking"
+  }
+  ,
+  {
+    "id": 3,
+    "productNumber": "PRD-1003",
+    "name": "Espresso Machine",
+    "price": 249,
+    "category": "Kitchen",
+    "rating": 4.7,
+    "image": "https://via.placeholder.com/300",
+    "description": "Compact espresso machine for home baristas"
+  },
+  {
+    "id": 4,
+    "productNumber": "PRD-1004",
+    "name": "Yoga Mat",
+    "price": 35,
+    "category": "Fitness",
+    "rating": 4.3,
+    "image": "https://via.placeholder.com/300",
+    "description": "Non-slip, cushioned yoga mat"
+  },
+  {
+    "id": 5,
+    "productNumber": "PRD-1005",
+    "name": "Stainless Steel Water Bottle",
+    "price": 22,
+    "category": "Outdoors",
+    "rating": 4.6,
+    "image": "https://via.placeholder.com/300",
+    "description": "Insulated bottle keeps drinks cold for 24 hours"
+  },
+  {
+    "id": 6,
+    "productNumber": "PRD-1006",
+    "name": "Classic Novel - Hardcover",
+    "price": 18,
+    "category": "Books",
+    "rating": 4.8,
+    "image": "https://via.placeholder.com/300",
+    "description": "A beautifully bound edition of a literary classic"
+  },
+  {
+    "id": 7,
+    "productNumber": "PRD-1007",
+    "name": "Canvas Tote Bag",
+    "price": 15,
+    "category": "Fashion",
+    "rating": 4.1,
+    "image": "https://via.placeholder.com/300",
+    "description": "Durable canvas tote for everyday use"
+  }
+]

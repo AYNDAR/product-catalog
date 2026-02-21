@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { products } from "../data/products";
+import products from "../data/products.json";
 import type { Product } from "../types/products";
 
 function ProductDetail() {

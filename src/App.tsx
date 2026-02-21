@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard from "./components/ProductCard";
 import SearchBar from "./components/SearchBar";
 import CategoryFilter from "./components/CategoryFilter";
@@ -13,18 +13,29 @@ function App() {
   const [sortOrder, setSortOrder] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Simulated loading
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 800);
+  }, []);
 
   const categories = [
-    ...new Set(products.map((product: Product) => product.category)),
+    "All",
+    "Electronics",
+    "Fashion",
+    "Home & Furniture",
+    "Beauty & Personal Care",
+    "Books & Education",
+    "Gaming",
   ];
 
-  // Add to cart
   const addToCart = (product: Product) => {
-    setCartItems((prev: Product[]) => [...prev, product]);
+    setCartItems((prev) => [...prev, product]);
     setIsCartOpen(true);
   };
 
-  // Remove from cart
   const removeFromCart = (id: number) => {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
@@ -46,52 +57,83 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-12 py-6 relative">
-      <h1 className="text-3xl font-bold text-center py-6">Product Catalog</h1>
+    <div className="min-h-screen bg-gray-100 relative">
+      {/* Responsive Header */}
+      <header className="bg-white shadow-md px-4 sm:px-6 lg:px-12 py-4 flex justify-between items-center">
+        <h1 className="text-xl sm:text-2xl font-bold">Product Catalog</h1>
 
-      {/* Cart Button */}
-      <button
-        onClick={() => setIsCartOpen(true)}
-        className="fixed top-6 right-6 bg-blue-600 text-white px-4 py-2 rounded shadow-lg z-30"
-      >
-        🛒 ({cartItems.length})
-      </button>
+        <div className="hidden md:flex items-center gap-6">
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded shadow"
+          >
+            🛒 ({cartItems.length})
+          </button>
+        </div>
 
-      {/* Controls */}
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        {/* Mobile menu button */}
+        <button
+          className="md:hidden text-2xl"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          ☰
+        </button>
+      </header>
 
-      <CategoryFilter
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        categories={categories}
-      />
+      {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white shadow-md p-4 space-y-4">
+          <button
+            onClick={() => {
+              setIsCartOpen(true);
+              setIsMobileMenuOpen(false);
+            }}
+            className="w-full bg-blue-600 text-white p-2 rounded"
+          >
+            🛒 Cart ({cartItems.length})
+          </button>
+        </div>
+      )}
 
-      <SortOptions sortOrder={sortOrder} setSortOrder={setSortOrder} />
+      <div className="px-4 sm:px-6 lg:px-12 py-6">
+        {/* Controls */}
+        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-      {/* Products Grid */}
-      <div
-        className="grid gap-6
-                   grid-cols-1
-                   sm:grid-cols-2
-                   md:grid-cols-3
-                   lg:grid-cols-4
-                   xl:grid-cols-5"
-      >
-        {filteredProducts.map((product) => (
-          <div key={product.id}>
-            <ProductCard product={product} />
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          categories={categories}
+        />
 
-            <button
-              onClick={() => addToCart(product)}
-              className="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
-            >
-              Add to Cart
-            </button>
+        <SortOptions sortOrder={sortOrder} setSortOrder={setSortOrder} />
+        {loading ? (
+          <div className="text-center py-12 text-lg text-gray-500">
+            Loading...
           </div>
-        ))}
+        ) : (
+          <div
+            className="grid gap-6
+                  grid-cols-1
+                  sm:grid-cols-2
+                  md:grid-cols-3
+                  lg:grid-cols-4
+                  xl:grid-cols-5"
+          >
+            {filteredProducts.map((product) => (
+              <div key={product.id}>
+                <ProductCard product={product} />
+                <button
+                  onClick={() => addToCart(product)}
+                  className="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Cart Sidebar (Only Once) */}
       <Cart
         cartItems={cartItems}
         removeFromCart={removeFromCart}

@@ -23,9 +23,12 @@ function Cart({ cartItems, removeFromCart, isOpen, onClose }: Props) {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg p-4 z-50 transform transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full 
+            w-full sm:w-96 
+            bg-white shadow-lg p-4 z-50 
+            transform transition-transform duration-300 ${
+              isOpen ? "translate-x-0" : "translate-x-full"
+            }`}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">🛒 Cart</h2>

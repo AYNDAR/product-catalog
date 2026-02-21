@@ -18,8 +18,7 @@
     "rating": 4.2,
     "image": "https://via.placeholder.com/300",
     "description": "Advanced smartwatch with health tracking"
-  }
-  ,
+  },
   {
     "id": 3,
     "productNumber": "PRD-1003",
@@ -69,5 +68,25 @@
     "rating": 4.1,
     "image": "https://via.placeholder.com/300",
     "description": "Durable canvas tote for everyday use"
+  },
+  {
+    "id": 8,
+    "name": "Gaming Laptop",
+    "image": "/images/laptop.jpg",
+    "productNumber": "EL-001",
+    "price": 1200,
+    "category": "Electronics",
+    "rating": 4.5,
+    "description": "High performance gaming laptop."
+  },
+  {
+    "id": 9,
+    "name": "Office Chair",
+    "image": "/images/chair.jpg",
+    "productNumber": "HF-002",
+    "price": 250,
+    "category": "Home & Furniture",
+    "rating": 4.2,
+    "description": "Comfortable ergonomic office chair."
   }
 ]

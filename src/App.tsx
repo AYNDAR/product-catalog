@@ -1,35 +1,35 @@
 import { useState, useEffect } from "react";
 import ProductCard from "./components/ProductCard";
 import SearchBar from "./components/SearchBar";
-import CategoryFilter from "./components/CategoryFilter";
 import SortOptions from "./components/SortOptions";
 import Cart from "./components/Cart";
+import CategoryBar from "./components/CategoryBar";
 import type { Product } from "./types/products";
-import products from "./data/products.json";
+import { products } from "./data/products";
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [sortOrder, setSortOrder] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<Product[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Simulated loading
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Loading simulation
   useEffect(() => {
     setTimeout(() => setLoading(false), 800);
   }, []);
-
-  const categories = [
-    "All",
-    "Electronics",
-    "Fashion",
-    "Home & Furniture",
-    "Beauty & Personal Care",
-    "Books & Education",
-    "Gaming",
-  ];
 
   const addToCart = (product: Product) => {
     setCartItems((prev) => [...prev, product]);
@@ -40,14 +40,16 @@ function App() {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  // Filtering
   let filteredProducts = products
     .filter((product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      product.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
     )
     .filter((product) =>
-      selectedCategory ? product.category === selectedCategory : true,
+      selectedCategory === "ALL" ? true : product.category === selectedCategory,
     );
 
+  // Sorting
   if (sortOrder === "low-high") {
     filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
   }
@@ -58,20 +60,20 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 relative">
-      {/* Responsive Header */}
-      <header className="bg-white shadow-md px-4 sm:px-6 lg:px-12 py-4 flex justify-between items-center">
-        <h1 className="text-xl sm:text-2xl font-bold">Product Catalog</h1>
+      <header className="bg-[#131921] text-white px-4 sm:px-6 lg:px-12 py-4 flex justify-between items-center">
+        <h1 className="text-xl sm:text-2xl font-bold text-yellow-400">
+          MyShop
+        </h1>
 
         <div className="hidden md:flex items-center gap-6">
           <button
             onClick={() => setIsCartOpen(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded shadow"
+            className="bg-yellow-400 text-black px-4 py-2 rounded shadow font-semibold"
           >
             🛒 ({cartItems.length})
           </button>
         </div>
 
-        {/* Mobile menu button */}
         <button
           className="md:hidden text-2xl"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -80,7 +82,11 @@ function App() {
         </button>
       </header>
 
-      {/* Mobile Navigation */}
+      <CategoryBar
+        selected={selectedCategory}
+        setSelected={setSelectedCategory}
+      />
+
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white shadow-md p-4 space-y-4">
           <button
@@ -88,7 +94,7 @@ function App() {
               setIsCartOpen(true);
               setIsMobileMenuOpen(false);
             }}
-            className="w-full bg-blue-600 text-white p-2 rounded"
+            className="w-full bg-yellow-400 text-black p-2 rounded"
           >
             🛒 Cart ({cartItems.length})
           </button>
@@ -96,35 +102,27 @@ function App() {
       )}
 
       <div className="px-4 sm:px-6 lg:px-12 py-6">
-        {/* Controls */}
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-        <CategoryFilter
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          categories={categories}
-        />
-
         <SortOptions sortOrder={sortOrder} setSortOrder={setSortOrder} />
+
         {loading ? (
           <div className="text-center py-12 text-lg text-gray-500">
             Loading...
           </div>
+        ) : filteredProducts.length === 0 ? (
+          <p className="text-center text-gray-500 text-lg mt-10">
+            No products found.
+          </p>
         ) : (
-          <div
-            className="grid gap-6
-                  grid-cols-1
-                  sm:grid-cols-2
-                  md:grid-cols-3
-                  lg:grid-cols-4
-                  xl:grid-cols-5"
-          >
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filteredProducts.map((product) => (
               <div key={product.id}>
                 <ProductCard product={product} />
+
                 <button
                   onClick={() => addToCart(product)}
-                  className="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+                  className="mt-2 w-full bg-yellow-400 text-black p-2 rounded hover:bg-yellow-500 transition font-semibold"
                 >
                   Add to Cart
                 </button>

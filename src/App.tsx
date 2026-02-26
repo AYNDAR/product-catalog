@@ -10,7 +10,7 @@ import { products } from "./data/products";
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOrder, setSortOrder] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<Product[]>([]);
@@ -28,7 +28,8 @@ function App() {
 
   // Loading simulation
   useEffect(() => {
-    setTimeout(() => setLoading(false), 800);
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
   }, []);
 
   const addToCart = (product: Product) => {
@@ -46,7 +47,9 @@ function App() {
       product.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
     )
     .filter((product) =>
-      selectedCategory === "ALL" ? true : product.category === selectedCategory,
+      selectedCategory.toLowerCase() === "all"
+        ? true
+        : product.category.toLowerCase() === selectedCategory.toLowerCase(),
     );
 
   // Sorting
@@ -62,7 +65,7 @@ function App() {
     <div className="min-h-screen bg-gray-100 relative">
       <header className="bg-[#131921] text-white px-4 sm:px-6 lg:px-12 py-4 flex justify-between items-center">
         <h1 className="text-xl sm:text-2xl font-bold text-yellow-400">
-          MyShop
+          PRODUCT CATALOG
         </h1>
 
         <div className="hidden md:flex items-center gap-6">

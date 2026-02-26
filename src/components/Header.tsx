@@ -2,9 +2,11 @@ import { Search, ShoppingCart } from "lucide-react";
 
 const Header = () => {
   return (
-    <header className="bg-[#131921] text-white px-6 py-3">
+    <header className="bg-[#0F172A] text-white px-4 sm:px-6 lg:px-12 py-4 flex justify-between items-center shadow-lg">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-yellow-400">MyShop</h1>
+        <h1 className="text-cyan-400 font-bold tracking-wide">
+          PRODUCT CATALOG
+        </h1>
 
         <div className="flex flex-1 max-w-2xl">
           <input
@@ -13,7 +15,7 @@ const Header = () => {
             className="w-full px-4 py-2 text-black rounded-l-md focus:outline-none"
           />
           <button
-            className="bg-yellow-400 px-4 rounded-r-md text-black"
+            className="bg-cyan-500 text-white hover:bg-cyan-600 transition shadow-md"
             aria-label="Search"
           >
             <Search size={20} />

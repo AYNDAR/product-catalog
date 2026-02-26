@@ -12,7 +12,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
   return (
     <div
       onClick={() => navigate(`/product/${product.id}`)}
-      className="bg-white rounded shadow hover:shadow-xl transition duration-300 cursor-pointer p-4"
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 cursor-pointer p-4 hover:-translate-y-1"
     >
       <img
         src={product.image}

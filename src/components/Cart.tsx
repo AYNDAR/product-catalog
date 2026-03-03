@@ -9,12 +9,23 @@ type CartProduct = Product & {
 type Props = {
   cartItems: Product[];
   removeFromCart: (id: number) => void;
+  // Added these to match what CartItem likely expec
+  //
+  addToCart: (product: Product) => void;
+  removeOneFromCart: (id: number) => void;
   isOpen: boolean;
   onClose: () => void;
 };
 
-function Cart({ cartItems, removeFromCart, isOpen, onClose }: Props) {
-  // ⭐ Group cart items using memo (NO useEffect, NO extra state)
+function Cart({
+  cartItems,
+  removeFromCart,
+  addToCart,
+  removeOneFromCart,
+  isOpen,
+  onClose,
+}: Props) {
+  // ⭐ Group cart items using memo
   const items = useMemo(() => {
     const grouped: CartProduct[] = [];
 
@@ -31,7 +42,6 @@ function Cart({ cartItems, removeFromCart, isOpen, onClose }: Props) {
     return grouped;
   }, [cartItems]);
 
-  // Quantity handlers (optional UI only)
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [items],
@@ -62,14 +72,16 @@ function Cart({ cartItems, removeFromCart, isOpen, onClose }: Props) {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">🛒 Cart</h2>
-          <button onClick={onClose} className="text-gray-500">
-            ✖
+          <button onClick={onClose} className="text-gray-500 text-xl">
+            ×
           </button>
         </div>
 
         {/* Cart Content Scroll Area */}
         <div className="flex-1 overflow-y-auto max-h-[calc(100vh-180px)]">
-          {items.length === 0 && <p className="text-gray-500">Cart is empty</p>}
+          {items.length === 0 && (
+            <p className="text-gray-500 text-center mt-10">Cart is empty</p>
+          )}
 
           {items.map((item) => (
             <CartItem
@@ -77,6 +89,9 @@ function Cart({ cartItems, removeFromCart, isOpen, onClose }: Props) {
               product={item}
               quantity={item.quantity}
               removeFromCart={removeFromCart}
+              // Passing the required props to fix the TS error:
+              increaseQuantity={() => addToCart(item)}
+              decreaseQuantity={() => removeOneFromCart(item.id)}
             />
           ))}
         </div>
@@ -84,9 +99,18 @@ function Cart({ cartItems, removeFromCart, isOpen, onClose }: Props) {
         {/* Footer */}
         {items.length > 0 && (
           <div className="border-t pt-4 space-y-2 mt-2">
-            <div>Subtotal: ${subtotal.toFixed(2)}</div>
-            <div>Tax (10%): ${tax.toFixed(2)}</div>
-            <div className="font-bold text-lg">Total: ${total.toFixed(2)}</div>
+            <div className="flex justify-between">
+              <span>Subtotal:</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Tax (10%):</span>
+              <span>${tax.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-lg border-t pt-2">
+              <span>Total:</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
 
             <div className="flex flex-col gap-2 mt-3">
               <button className="bg-red-500 text-white py-2 rounded hover:bg-red-600 transition">

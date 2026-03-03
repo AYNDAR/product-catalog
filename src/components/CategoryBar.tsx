@@ -25,7 +25,7 @@ const categories = [
 
 const CategoryBar: React.FC<Props> = ({ selected, setSelected }) => {
   return (
-    <div className="bg-[#232f3e] text-white flex overflow-x-auto px-4 py-3 gap-6">
+    <div className="bg-[#232f3e] text-white flex overflow-x-auto px-4 py-3 gap-6 sticky top-16 z-40">
       {categories.map((cat) => {
         const Icon = cat.icon;
         return (

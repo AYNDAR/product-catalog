@@ -6,14 +6,28 @@ import Cart from "./components/Cart";
 import CategoryBar from "./components/CategoryBar";
 import type { Product } from "./types/products";
 import { products } from "./data/products";
+import Footer from "./components/Footer";
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOrder, setSortOrder] = useState("");
+  const [minRating, setMinRating] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
   const [cartItems, setCartItems] = useState<Product[]>([]);
+  const removeOneFromCart = (id: number) => {
+    setCartItems((prev) => {
+      const index = prev.findIndex((item) => item.id === id);
+
+      if (index === -1) return prev;
+
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
+    });
+  };
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -42,28 +56,35 @@ function App() {
   };
 
   // Filtering
-  let filteredProducts = products
+  // 1. Filter the products first
+  const filtered = products
     .filter((product) =>
       product.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
     )
-    .filter((product) =>
-      selectedCategory.toLowerCase() === "all"
-        ? true
-        : product.category.toLowerCase() === selectedCategory.toLowerCase(),
-    );
+    .filter((product) => {
+      const categoryMatch =
+        selectedCategory.toUpperCase() === "ALL" ||
+        product.category.toLowerCase() === selectedCategory.toLowerCase();
+      return categoryMatch;
+    })
+    .filter((product) => product.rating >= minRating);
 
-  // Sorting
-  if (sortOrder === "low-high") {
-    filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
-  }
-
-  if (sortOrder === "high-low") {
-    filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
-  }
+  const sortedAndFilteredProducts = [...filtered].sort((a, b) => {
+    switch (sortOrder) {
+      case "low-high":
+        return a.price - b.price;
+      case "high-low":
+        return b.price - a.price;
+      case "rating":
+        return b.rating - a.rating; // Highest rating first
+      default:
+        return 0; // No sorting applied
+    }
+  });
 
   return (
     <div className="min-h-screen bg-gray-100 relative">
-      <header className="bg-[#131921] text-white px-4 sm:px-6 lg:px-12 py-4 flex justify-between items-center">
+      <header className="sticky top-0 z-50 bg-[#0F172A] text-white px-4 sm:px-6 lg:px-12 py-4 flex justify-between items-center shadow-lg">
         <h1 className="text-xl sm:text-2xl font-bold text-yellow-400">
           PRODUCT CATALOG
         </h1>
@@ -85,10 +106,12 @@ function App() {
         </button>
       </header>
 
-      <CategoryBar
-        selected={selectedCategory}
-        setSelected={setSelectedCategory}
-      />
+      <div className="mb-4 z-10">
+        <CategoryBar
+          selected={selectedCategory}
+          setSelected={setSelectedCategory}
+        />
+      </div>
 
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white shadow-md p-4 space-y-4">
@@ -104,43 +127,52 @@ function App() {
         </div>
       )}
 
-      <div className="px-4 sm:px-6 lg:px-12 py-6">
+      <div className="mb-4 relative z-20">
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <div className="px-4 sm:px-6 lg:px-12 py-6">
+          <SortOptions
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+            minRating={minRating}
+            setMinRating={setMinRating}
+          />
 
-        <SortOptions sortOrder={sortOrder} setSortOrder={setSortOrder} />
+          {loading ? (
+            <div className="text-center py-12 text-lg text-gray-500">
+              Loading...
+            </div>
+          ) : filtered.length === 0 ? (
+            <p className="text-center text-gray-500 text-lg mt-10">
+              No products found.
+            </p>
+          ) : (
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ">
+              {sortedAndFilteredProducts.map((product) => (
+                <div key={product.id}>
+                  <ProductCard product={product} />
 
-        {loading ? (
-          <div className="text-center py-12 text-lg text-gray-500">
-            Loading...
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <p className="text-center text-gray-500 text-lg mt-10">
-            No products found.
-          </p>
-        ) : (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {filteredProducts.map((product) => (
-              <div key={product.id}>
-                <ProductCard product={product} />
-
-                <button
-                  onClick={() => addToCart(product)}
-                  className="mt-2 w-full bg-yellow-400 text-black p-2 rounded hover:bg-yellow-500 transition font-semibold"
-                >
-                  Add to Cart
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="mt-2 w-full bg-yellow-400 text-black p-2 rounded hover:bg-yellow-500 transition font-semibold"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <Cart
         cartItems={cartItems}
+        addToCart={addToCart}
+        removeOneFromCart={removeOneFromCart}
         removeFromCart={removeFromCart}
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
       />
+      <Footer />
     </div>
   );
 }

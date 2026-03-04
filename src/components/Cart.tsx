@@ -1,31 +1,21 @@
 import { useMemo } from "react";
 import type { Product } from "../types/products";
 import CartItem from "./CartItem";
+import { useCart } from "../context/CartContext";
 
 type CartProduct = Product & {
   quantity: number;
 };
 
 type Props = {
-  cartItems: Product[];
-  removeFromCart: (id: number) => void;
-  // Added these to match what CartItem likely expec
-  //
-  addToCart: (product: Product) => void;
-  removeOneFromCart: (id: number) => void;
   isOpen: boolean;
   onClose: () => void;
 };
 
-function Cart({
-  cartItems,
-  removeFromCart,
-  addToCart,
-  removeOneFromCart,
-  isOpen,
-  onClose,
-}: Props) {
-  // ⭐ Group cart items using memo
+function Cart({ isOpen, onClose }: Props) {
+  const { cartItems, addToCart, removeFromCart, removeOneFromCart } = useCart();
+
+  // Group cart items
   const items = useMemo(() => {
     const grouped: CartProduct[] = [];
 
@@ -42,6 +32,7 @@ function Cart({
     return grouped;
   }, [cartItems]);
 
+  // Calculations
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [items],
@@ -77,8 +68,8 @@ function Cart({
           </button>
         </div>
 
-        {/* Cart Content Scroll Area */}
-        <div className="flex-1 overflow-y-auto max-h-[calc(100vh-180px)]">
+        {/* Scroll Area */}
+        <div className="flex-1 overflow-y-auto">
           {items.length === 0 && (
             <p className="text-gray-500 text-center mt-10">Cart is empty</p>
           )}
@@ -89,7 +80,6 @@ function Cart({
               product={item}
               quantity={item.quantity}
               removeFromCart={removeFromCart}
-              // Passing the required props to fix the TS error:
               increaseQuantity={() => addToCart(item)}
               decreaseQuantity={() => removeOneFromCart(item.id)}
             />
@@ -98,22 +88,27 @@ function Cart({
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t pt-4 space-y-2 mt-2">
+          <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between">
               <span>Subtotal:</span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
+
             <div className="flex justify-between text-sm text-gray-600">
               <span>Tax (10%):</span>
               <span>${tax.toFixed(2)}</span>
             </div>
+
             <div className="flex justify-between font-bold text-lg border-t pt-2">
               <span>Total:</span>
               <span>${total.toFixed(2)}</span>
             </div>
 
             <div className="flex flex-col gap-2 mt-3">
-              <button className="bg-red-500 text-white py-2 rounded hover:bg-red-600 transition">
+              <button
+                onClick={() => items.forEach((item) => removeFromCart(item.id))}
+                className="bg-red-500 text-white py-2 rounded hover:bg-red-600 transition"
+              >
                 Clear Cart
               </button>
 

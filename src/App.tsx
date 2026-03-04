@@ -4,9 +4,9 @@ import SearchBar from "./components/SearchBar";
 import SortOptions from "./components/SortOptions";
 import Cart from "./components/Cart";
 import CategoryBar from "./components/CategoryBar";
-import type { Product } from "./types/products";
-import { products } from "./data/products";
 import Footer from "./components/Footer";
+import { products } from "./data/products";
+import { useCart } from "./context/CartContext";
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,23 +15,15 @@ function App() {
   const [sortOrder, setSortOrder] = useState("");
   const [minRating, setMinRating] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
-
-  const [cartItems, setCartItems] = useState<Product[]>([]);
-  const removeOneFromCart = (id: number) => {
-    setCartItems((prev) => {
-      const index = prev.findIndex((item) => item.id === id);
-
-      if (index === -1) return prev;
-
-      const updated = [...prev];
-      updated.splice(index, 1);
-      return updated;
-    });
-  };
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Debounce search
+  // ✅ Cart Context
+  const { cartItems } = useCart();
+
+  /* ===============================
+     SEARCH DEBOUNCE
+  =============================== */
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -40,50 +32,51 @@ function App() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Loading simulation
+  /* ===============================
+     LOADING SIMULATION
+  =============================== */
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
-  const addToCart = (product: Product) => {
-    setCartItems((prev) => [...prev, product]);
-    setIsCartOpen(true);
-  };
-
-  const removeFromCart = (id: number) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  // Filtering
-  // 1. Filter the products first
-  const filtered = products
+  /* ===============================
+     FILTER PRODUCTS
+  =============================== */
+  const filteredProducts = products
     .filter((product) =>
       product.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
     )
     .filter((product) => {
-      const categoryMatch =
-        selectedCategory.toUpperCase() === "ALL" ||
-        product.category.toLowerCase() === selectedCategory.toLowerCase();
-      return categoryMatch;
+      if (selectedCategory === "All") return true;
+      return product.category.toLowerCase() === selectedCategory.toLowerCase();
     })
     .filter((product) => product.rating >= minRating);
 
-  const sortedAndFilteredProducts = [...filtered].sort((a, b) => {
+  /* ===============================
+     SORT PRODUCTS
+  =============================== */
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortOrder) {
       case "low-high":
         return a.price - b.price;
+
       case "high-low":
         return b.price - a.price;
+
       case "rating":
-        return b.rating - a.rating; // Highest rating first
+        return b.rating - a.rating;
+
       default:
-        return 0; // No sorting applied
+        return 0;
     }
   });
 
   return (
-    <div className="min-h-screen bg-gray-100 relative">
+    <div className="min-h-screen bg-gray-100">
+      {/* ===============================
+          HEADER
+      =============================== */}
       <header className="sticky top-0 z-50 bg-[#0F172A] text-white px-4 sm:px-6 lg:px-12 py-4 flex justify-between items-center shadow-lg">
         <h1 className="text-xl sm:text-2xl font-bold text-yellow-400">
           PRODUCT CATALOG
@@ -106,13 +99,17 @@ function App() {
         </button>
       </header>
 
-      <div className="mb-4 z-10">
-        <CategoryBar
-          selected={selectedCategory}
-          setSelected={setSelectedCategory}
-        />
-      </div>
+      {/* ===============================
+          CATEGORY BAR
+      =============================== */}
+      <CategoryBar
+        selected={selectedCategory}
+        setSelected={setSelectedCategory}
+      />
 
+      {/* ===============================
+          MOBILE MENU
+      =============================== */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white shadow-md p-4 space-y-4">
           <button
@@ -127,51 +124,49 @@ function App() {
         </div>
       )}
 
-      <div className="mb-4 relative z-20">
+      {/* ===============================
+          SEARCH + SORT
+      =============================== */}
+      <div className="px-4 sm:px-6 lg:px-12 py-6">
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        <div className="px-4 sm:px-6 lg:px-12 py-6">
-          <SortOptions
-            sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
-            minRating={minRating}
-            setMinRating={setMinRating}
-          />
 
-          {loading ? (
-            <div className="text-center py-12 text-lg text-gray-500">
-              Loading...
-            </div>
-          ) : filtered.length === 0 ? (
-            <p className="text-center text-gray-500 text-lg mt-10">
-              No products found.
-            </p>
-          ) : (
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ">
-              {sortedAndFilteredProducts.map((product) => (
-                <div key={product.id}>
-                  <ProductCard product={product} />
+        <SortOptions
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          minRating={minRating}
+          setMinRating={setMinRating}
+        />
 
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="mt-2 w-full bg-yellow-400 text-black p-2 rounded hover:bg-yellow-500 transition font-semibold"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* ===============================
+            PRODUCT GRID
+        =============================== */}
+        {loading ? (
+          <div className="text-center py-12 text-lg text-gray-500">
+            Loading...
+          </div>
+        ) : sortedProducts.length === 0 ? (
+          <p className="text-center text-gray-500 text-lg mt-10">
+            No products found.
+          </p>
+        ) : (
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {sortedProducts.map((product) => (
+              <div key={product.id}>
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      <Cart
-        cartItems={cartItems}
-        addToCart={addToCart}
-        removeOneFromCart={removeOneFromCart}
-        removeFromCart={removeFromCart}
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-      />
+      {/* ===============================
+          CART SIDEBAR
+      =============================== */}
+      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* ===============================
+          FOOTER
+      =============================== */}
       <Footer />
     </div>
   );
